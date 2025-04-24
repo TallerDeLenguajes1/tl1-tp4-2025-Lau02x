@@ -26,7 +26,7 @@ Nodo * crearListaVacia();
 Nodo * CrearNodo(int id, char *descripcion, int duracion);
 int main ()
 {
-    Nodo *Start =crearListaVacia();
+    Nodo *Start=crearListaVacia();
     
 
 
