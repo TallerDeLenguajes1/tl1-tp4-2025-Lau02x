@@ -32,39 +32,68 @@ void EliminarNodo(Nodo * nodo);
 void ListarTareas(Nodo * TareasRealizadas, Nodo * TareasPendientes);
 void InsertarNodo(Nodo **Start , Nodo * NodoAInsertar);
 Nodo * QuitarNodo(Nodo ** Start, int id);
+void cargarTareasARealizar(Nodo * TareasPendientes,int *id);
+void moverTareaPendienteARealizada(Nodo * TareasPendientes,Nodo * TareasRealizadas,int idMover);
 int main ()
 {
-    char *Buff;
-    char *descripcion;
-    int duracion;
+   
     int idBuscar;
-    int id=1000;
+    int *id=1000;
+    int idMover;
     int eleccion;
     Nodo * Eliminado;
     Nodo * NodoEncontrado;
     Nodo *TareasRealizadas=crearListaVacia();
     Nodo *TareasPendientes=crearListaVacia();
-    Buff = (char *) malloc (sizeof(char)*150);
     char * palabraClave;
+ 
+
     do
     {
-        printf("\n Cargar tareas a realizar: \n");
-        printf("Descripcion de la tarea: \n");
-        getchar();
-        gets(Buff);
-        descripcion = (char *) malloc ( sizeof(char)*(strlen(Buff)+1) );
-        strcpy(descripcion,Buff);
-        printf("Duracion de la tarea(entre 10 y 100): \n");
-        scanf("%d",&duracion);
-        Nodo *nuevoNodo = CrearNodo(id, descripcion, duracion);
-        InsertarNodo(&TareasPendientes,nuevoNodo);
 
-        printf(" \n Desea ingresar otra tarea?(1) o finalizar(0): ");
+        do{
+        printf("Menu: Cargar Tareas a realizar (1)\nMover una tarea pendiente a tareas realizadas(2) \nnListar todas las tareas pendientes y realizadas(3)\nBuscar tareas(4)\nFinalizar(5)");
         scanf("%d",&eleccion);
-        id++;
+            }
+        while(eleccion!=1 || eleccion!=2 || eleccion!=3 || eleccion!=4);
+        switch (eleccion)
+        {
+        case 1:
+                cargarTareasARealizar(TareasPendientes,&id);
+        break;
+        case 2:
+                ListarTareas(0,TareasPendientes);
+                printf("Elegir id de Tareas Pendientes para mover a Tareas Realizadas:");
+                scanf("%d",idMover);
+                moverTareaPendienteARealizada(TareasPendientes,TareasRealizadas,idMover);
+        break;
+        case 3:
+                ListarTareas(TareasRealizadas,TareasPendientes);
+            
+        break;
+        case 4:
+                  printf("Buscar tarea por id(0) o por palabra clave(1)? ");
+                scanf("%d",&eleccion);
+                if(eleccion==0)
+                {
+                    buscarTareaPorId(TareasRealizadas,TareasPendientes,idBuscar);
+                }
+                else
+                {
+                    buscarTareaPorPalabraClave(TareasRealizadas,TareasPendientes,idBuscar);
+                }
+        break;
+        case 5:
+                return 0;
+        break;
+        default: 
+                    return 0;
+        break;
+        }
+
     }
-    while(eleccion != 0);
-    eleccion=1;
+    while(eleccion!=5);
+    
     do{
 
 
@@ -101,7 +130,6 @@ int main ()
     
         
     
-    
 
 
 
@@ -109,7 +137,8 @@ int main ()
 
 
 
-free(Buff);
+
+
 return 0;
 }
 
@@ -182,25 +211,82 @@ Nodo * buscarTareaPorPalabraClave(Nodo * StartRealizadas,Nodo * StartPendientes,
     }
     printf("La tarea no fue encontrada");
     return NULL;
-    
 }
 void ListarTareas(Nodo * TareasRealizadas, Nodo * TareasPendientes)
 {
     Nodo * Aux;
     Aux=TareasRealizadas;
-    printf("\n Estas son las tareas Realizadas: \n");
+if(TareasRealizadas)
+{
+ printf("\n Estas son las tareas Realizadas: \n");
     while (Aux)
     {
         printf("Tarea %d : %s \n Duracion: %d \n ",Aux->T.TareaID,Aux->T.Descripcion,Aux->T.Duracion);
         Aux=Aux->Siguiente;
     }
-    Aux=TareasPendientes;
+}
+if(TareasPendientes)
+{
+ Aux=TareasPendientes;
     printf("\n Estas son las tareas Pendientes: \n");
     while (Aux)
     {
         printf("Tarea %d : %s \n Duracion: %d \n ",Aux->T.TareaID,Aux->T.Descripcion,Aux->T.Duracion);
         Aux=Aux->Siguiente;
     }
-
-    
+}
+      
+}
+void cargarTareasARealizar(Nodo * TareasPendientes,int *id)
+{
+    char *Buff;
+    Buff = (char *) malloc (sizeof(char)*150);
+    char *descripcion;
+    int duracion;
+    printf("\n Cargar tareas a realizar: \n");
+    printf("Descripcion de la tarea: \n");
+    getchar();
+    gets(Buff);
+    descripcion = (char *) malloc ( sizeof(char)*(strlen(Buff)+1) );
+    strcpy(descripcion,Buff);
+    printf("Duracion de la tarea(entre 10 y 100): \n");
+    scanf("%d",&duracion);
+    Nodo *nuevoNodo = CrearNodo(id, descripcion, duracion);
+    InsertarNodo(&TareasPendientes,nuevoNodo);
+    *id++;
+    free(Buff);
+}
+void moverTareaPendienteARealizada(Nodo * TareasPendientes,Nodo * TareasRealizadas,int idMover)
+{
+    Nodo * Aux = TareasPendientes;
+    Nodo * Eliminado;
+    while(Aux && Aux->T.TareaID != idMover)
+    {
+        Aux=Aux->Siguiente;
+    }
+    if(Aux)
+    {
+        InsertarNodo(&TareasRealizadas,Aux);
+        Eliminado=QuitarNodo(&TareasPendientes,Aux);
+        EliminarNodo(Eliminado);
+    }
+}
+Nodo * QuitarNodo(Nodo **Start, int id)
+{ Nodo *nodoAux = (*Start);
+Nodo *nodoAnt = NULL;
+while (nodoAux != NULL && nodoAux->T.TareaID != id)
+{ nodoAnt = nodoAux;
+nodoAux = nodoAux->Siguiente;
+}
+if (nodoAux != NULL)
+{
+if (nodoAux == (*Start))
+{ (*Start) = nodoAux->Siguiente;
+}
+else
+{ nodoAnt->Siguiente = nodoAux->Siguiente;
+}
+nodoAux->Siguiente = NULL;
+}
+return (nodoAux);
 }
